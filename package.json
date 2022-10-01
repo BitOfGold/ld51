@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite --host 0.0.0.0"
+    "dev": "vite --port 5555 --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --port 5555 --host 0.0.0.0"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vite": "^3.1.4"
+    "vite": "^3.1.4",
+    "vite-plugin-cross-origin-isolation": "^0.1.6"
   }
 }

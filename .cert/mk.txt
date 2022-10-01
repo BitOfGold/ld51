@@ -1,0 +1,1 @@
+mkcert test.hu "*.test.hu" test.hu localhost 192.168.0.200 127.0.0.1 ::1
