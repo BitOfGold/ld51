@@ -18,7 +18,8 @@ for (let i = 0; i< 500; i++)  {
 
 class Player extends Entity {
   speed = 120
-
+  screenBound = true
+  order = 1000
   update(dt) {
     this.vx = 0
     this.vy = 0
@@ -26,32 +27,66 @@ class Player extends Entity {
     if (keys.d) {this.vx = this.speed}
     if (keys.w) {this.vy = -this.speed}
     if (keys.s) {this.vy = this.speed}
+    
     let v = sqrt(this.vx * this.vx + this.vy * this.vy)
   }
 
 }
 
+const BSPEED = 30
 class Baddie extends Entity {
+  x = rnd(0, width)
+  y = rnd(0, height)
+  vx = rnd() > 0.5 ? BSPEED : -BSPEED
+  vy = rnd() > 0.5 ? BSPEED : -BSPEED
+  screenBounce = true
+  color = '#2A2'
+  order = 500
 }
 
-window.player = new Player({
-  x: 25,
-  y: 25
-})
+const BUSPEED = 120
+class Bullet extends Entity {
+  scale = [0.25, 0.25]
+  color1 = '#FFF'
+  color2 = '#66F'
+
+  draw() {
+    let cx = this.x + _shake[0]
+    let cy = this.y + _shake[1]
+    let dx = this.vx * 0.02
+    let dy = this.vy * 0.02
+    line(cx - dx, cy - dy, cx + dx, cy + dy, this.color2, 6, 0.8)
+    line(cx - dx, cy - dy, cx + dx, cy + dy, this.color1, 3, 1)
+  }
+}
+
+
+function startLevel() {
+  clearStage()
+  window.player = new Player({
+    x: 25,
+    y: 25
+  })
+  for (let i = 0; i < 10; i++) {
+    let b = new Baddie()
+  }
+}
+
+startLevel()
 
 window.drawBackground = () => {
-  clear('#222')
+  clear('#224')
   stars.forEach(s => {
-    let sx = width / 2 + s.r * cos(s.alpha)
-    let sy = height / 2 + s.r * sin(s.alpha)
+    let sx = width / 2 + s.r * cos(s.alpha) + _shake[0]
+    let sy = height / 2 + s.r * sin(s.alpha) + _shake[1]
     s.alpha += (s.z + 0.2) * PI / 360.
     rect(sx, sy, 1, 1, '#aaa', s.z)
   })
 }
 
 window.drawForeground = () => {
-  let cx = width / 2 | 0
-  let cy = height / 2 | 0
+  let cx = width / 2 + _shake[0]
+  let cy = height / 2 + _shake[1]
   let dx = cos(rayAlpha)
   let dy = sin(rayAlpha)
   line(cx, cy, cx + dx * width, cy + dy * width, '#F22', rayW)
@@ -77,8 +112,22 @@ window.update = (dt) => {
 window.onkey = (kc) => {
   if (kc == 'p') {
     sound('psfx')   
-  }
-  if (kc == 'o') {
+  } else if (kc == 'o') {
     beep()   
+  } else if (kc == ' ') {
+    _shakea = 12
+  } else if (kc == 'pointer1') {
+    vsub([pointerX, pointerY], [player.x, player.y], __v1)
+    vnor(__v1, __v1)
+    vmul(__v1, BUSPEED, __v1)
+    let b = new Bullet({
+      x: player.x,
+      y: player.y,
+      vx: __v1[0],
+      vy: __v1[1],
+    })
   }
+
+
+
 }

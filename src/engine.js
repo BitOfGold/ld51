@@ -1,13 +1,14 @@
 import "./canvas.js"
 import "./audio.js"
 import "./input.js"
+import "./vector.js"
 import "./entity.js"
 
 window.PI = Math.PI
 window.cos = Math.cos
 window.sin = Math.sin
 window.sqrt = Math.sqrt
-window.rnd = (min, max) => { return Math.random() * (max - min) + min }
+window.rnd = (min=0., max=1.) => { return Math.random() * (max - min) + min }
 
 window._uid = 0
 window.uid = () => _uid++
@@ -29,8 +30,9 @@ function _loop() {
   let dt = t - time
   if (dt < 0.1) {
       _shakea *= 0.8
-      _shake[0] = (Math.random() * 2. - 1.) * _shakea
-      _shake[1] = (Math.random() * 2. - 1.) * _shakea
+      if (_shakea < 2) { _shakea = 0.}
+      _shake[0] = rnd(-1, 1) * _shakea
+      _shake[1] = rnd(-1, 1) * _shakea
       updateAllEntities(dt)
       update(dt)
       drawBackground()

@@ -1,6 +1,7 @@
 window.keys = {}
 window.pointerX = -50
 window.pointerY = -50
+window.focused = true
 
 window.onkey = (key) => {}
 
@@ -20,11 +21,14 @@ document.oncontextmenu = (e) => {
 };
 
 document.addEventListener('pointerdown', (e) => {
-  //console.log("P down", e)
+  let kc = 'pointer' + e.which
+  keys[kc] = true
+  onkey(kc)
 })
 
 document.addEventListener('pointerup', (e) => {
-  //console.log("P up", e)
+  let kc = 'pointer' + e.which
+  keys[kc] = false
 })
 
 document.addEventListener('pointermove', (e) => {
@@ -35,4 +39,13 @@ document.addEventListener('pointermove', (e) => {
   let y = (e.clientY - o.top) / o.height * height;
   pointerX = x | 0;
   pointerY = y | 0;
+})
+
+window.addEventListener('blur', (e) => {
+  focused = false
+  keys = {}
+})
+
+window.addEventListener('focus', (e) => {
+  focused = true
 })
