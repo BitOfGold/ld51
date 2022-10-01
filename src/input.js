@@ -1,4 +1,6 @@
 window.keys = {}
+window.pointerX = -50
+window.pointerY = -50
 
 window.onkey = (key) => {}
 
@@ -13,12 +15,24 @@ document.onkeyup = (e) => {
   keys[kc] = false
 }
 
-display.addEventListener('pointerdown', (e) => {
+document.oncontextmenu = (e) => {
+  return false;
+};
+
+document.addEventListener('pointerdown', (e) => {
   //console.log("P down", e)
 })
-display.addEventListener('pointerup', (e) => {
+
+document.addEventListener('pointerup', (e) => {
   //console.log("P up", e)
 })
-display.addEventListener('pointermove', (e) => {
+
+document.addEventListener('pointermove', (e) => {
   //console.log("P move", e)
+  let o = display.getBoundingClientRect();
+
+  let x = (e.clientX - o.left) / o.width * width;
+  let y = (e.clientY - o.top) / o.height * height;
+  pointerX = x | 0;
+  pointerY = y | 0;
 })

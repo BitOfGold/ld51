@@ -17,7 +17,7 @@ ctx.lineWidth = 2
 window.rect = (x, y, w, h, style = '#FFF', alpha = 1.0) => {
   ctx.globalAlpha = alpha
   ctx.fillStyle = style
-  ctx.fillRect(x, y, w, h)
+  ctx.fillRect(x | 0, y | 0, w | 0, h | 0)
 }
 
 window.clear = (style = '#000') => {
@@ -30,8 +30,8 @@ window.line = (x1, y1, x2, y2, style = '#FFF', lineWidth = 2, alpha = 1.) => {
   ctx.strokeStyle = style
   ctx.lineWidth = lineWidth
   ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x2, y2)
+  ctx.moveTo(x1 | 0, y1 | 0)
+  ctx.lineTo(x2 | 0, y2 | 0)
   ctx.stroke()
 }
 
