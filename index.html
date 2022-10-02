@@ -4,7 +4,12 @@
   <meta charset="utf-8">
   <style>
     html {
+      box-sizing: border-box;
       height: 100%;
+    }
+
+    *, *:before, *:after {
+        box-sizing: inherit;
     }
 
     body {
@@ -13,16 +18,52 @@
       background: #000;
       display: flex;
       flex-direction: column;
+      user-select: none;
+    }
+
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 810px;
+      margin: auto;
     }
 
     canvas {
-      margin: auto;
+      position: absolute;
+      left: 0;
+      top: 0;
       cursor: none;
     }
+
+    #overlay1, #overlay2 {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 810px;
+      touch-action: none;
+      pointer-events: none;
+    }
+
+    #overlay1 {
+      background: url("assets/scanlines3.png");
+      background-repeat: repeat;
+    }
+
+    #overlay2 {
+      background: url("assets/crtborder.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
   </style>
 </head>
 <body>
-<canvas id="display"></canvas>
+  <div id="root">
+    <canvas id="display"></canvas>
+    <div id="overlay1"></div>
+    <div id="overlay2"></div>
+  </div>
 <script src="src/game.js" type="module"></script>
 </body>
 </html>

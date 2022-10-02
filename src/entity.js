@@ -2,19 +2,18 @@ window.E = [] // all entities, minx order
 window._dE = [] // all entities, display order
 
 class Entity {
-  x = 0.
-  y = 0.
-  order = 1.
-  w = 16.
-  h = 16.
-  color = '#aaa'
-  vx = 0.
-  vy = 0.
+  position = [0., 0.]
+  velocity = [0., 0.]
+  extend = [8., 8.]
   screenBounce = false
   screenBound = false
   screenWrap = false
   speed = 60.
-  alpha = 1.
+
+
+  alpha = 1. // draw alpha
+  order = 1. // draw order, lower first
+  color = '#aaa' // draw fill style/color
   scale = [1., 1.] // draw scale
 
   constructor(params) {
@@ -26,11 +25,24 @@ class Entity {
     _dE.push(this)
   }
 
+  set x(v) { this.position[0] = v}
+  get x() { return this.position[0]}
+  set y(v) { this.position[1] = v}
+  get y() { return this.position[1]}
+  set w(v) { this.extend[0] = v * .5}
+  get w() { return this.extend[0] * 2.}
+  set h(v) { this.extend[1] = v * .5}
+  get h() { return this.extend[1] * 2.}
+  set vx(v) { this.velocity[0] = v}
+  get vx() { return this.velocity[0]}
+  set vy(v) { this.velocity[1] = v}
+  get vy() { return this.velocity[1]}
+
   draw() {
-    let xs = this.w * this.scale[0]
-    let ys = this.h * this.scale[1]
-    let cx = this.x - xs / 2 - camera[0] + _shake[0]
-    let cy = this.y - xs / 2 - camera[1] + _shake[1]
+    let xs = this.extend[0] * 2 * this.scale[0]
+    let ys = this.extend[1] * 2 * this.scale[1]
+    let cx = this.position[0] - xs / 2 - camera[0] + _shake[0]
+    let cy = this.position[1] - ys / 2 - camera[1] + _shake[1]
     rect(cx, cy, xs, ys, this.color, this.alpha)
   }
 
@@ -39,43 +51,29 @@ class Entity {
   }
 
   _update(dt) {
-    this.x = this.x + this.vx * dt
-    this.y = this.y + this.vy * dt
-    let hw = this.w / 2
-    let hh = this.h / 2
-    if (this.screenBounce) {
-      if (this.x - hw < 0 && this.vx < 0) {
-        this.vx *= -1
+    this.position[0] += this.velocity[0] * dt
+    this.position[1] += this.velocity[1] * dt
+    for (let c = 0; c < 2; c++) {
+      let bound = c == 0 ? width : height
+      if (this.screenBounce) {
+        if (this.position[c] - this.extend[c] < 0 && this.velocity[c] < 0) {
+          this.velocity[c] *= -1
+        }
+        if (this.position[c] + this.extend[c] > bound && this.velocity[c] > 0) {
+          this.velocity[c] *= -1
+        }
       }
-      if (this.x + hw > width && this.vx > 0) {
-        this.vx *= -1
-      }
-      if (this.y - hh < 0 && this.vy < 0) {
-        this.vy *= -1
-      }
-      if (this.y + hh > height && this.vy > 0) {
-        this.vy *= -1
-      }
-    }
-    if (this.screenBound) {
-      if (this.x - hw < 0 && this.vx < 0) {
-        this.x = hw
-        this.vx *= 0
-      }
-      if (this.x + hw > width && this.vx > 0) {
-        this.x = width - hw
-        this.vx *= 0
-      }
-      if (this.y - hh < 0 && this.vy < 0) {
-        this.y = hh
-        this.vy *= 0
-      }
-      if (this.y + hh > height && this.vy > 0) {
-        this.y = height - hh
-        this.vy *= 0
+      if (this.screenBound) {
+        if (this.position[c] - this.extend[c] < 0 && this.velocity[c] < 0) {
+          this.position[c] = this.extend[c]
+          this.velocity[c] *= 0
+        }
+        if (this.position[c] + this.extend[c] > bound && this.velocity[c] > 0) {
+          this.position[c] = bound - this.extend[c]
+          this.velocity[c] *= 0
+        }
       }
     }
-
   }
 
   dispose() {
