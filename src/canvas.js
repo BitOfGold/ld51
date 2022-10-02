@@ -14,6 +14,20 @@ ctx.lineCap = 'round'
 ctx.lineJoin = 'round'
 ctx.lineWidth = 2
 
+window.hex2rgb = (hex) =>{
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+    return r + r + g + g + b + b;
+  });
+
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
 window.rect = (x, y, w, h, style = '#FFF', alpha = 1.0) => {
   ctx.globalAlpha = alpha
   ctx.fillStyle = style
@@ -152,7 +166,7 @@ window.drawTile = (name, index = 0, x = 0, y = 0, alpha = 1.0, scaleX = 1.0, sca
           let opixels = tctx.getImageData(0, 0, tiles.width, tiles.height).data
           let ipixels = tctx.createImageData(tiles.width, tiles.height)
           let pixels = ipixels.data
-          let c = this.hex2rgb(tintColor)
+          let c = hex2rgb(tintColor)
           for (let j = 0, n = pixels.length; j < n; j += 4) {
               pixels[j] = c.r
               pixels[j + 1] = c.g
@@ -184,7 +198,7 @@ window.drawTile = (name, index = 0, x = 0, y = 0, alpha = 1.0, scaleX = 1.0, sca
       dx = 0
       dy = 0
   }
-  if (tint < 0 || tint < 0.99) {
+  if (tint < 0.99) {
       ctx.globalAlpha = alpha
       ctx.drawImage(tiles.image, sx, sy, tiles.tileWidth, tiles.tileHeight, dx, dy, dw, dh)
   }

@@ -1,4 +1,5 @@
 window.keys = {}
+window.axes = {}
 window.pointerX = -50
 window.pointerY = -50
 window.focused = true
@@ -49,3 +50,27 @@ window.addEventListener('blur', (e) => {
 window.addEventListener('focus', (e) => {
   focused = true
 })
+
+window.clearGamepads = () => {
+}
+
+if (!!navigator.getGamepads) {  
+  setInterval(() => {
+    clearGamepads()
+    let gamepads = navigator.getGamepads()
+    for (let i = 0; i < gamepads.length; i++) {
+      let gp = gamepads[i]
+      if (gp && gp.connected) {
+        /*
+        console.log("    Index: " + gamepads[i].index);
+        console.log("    Mapping: " + gamepads[i].mapping);
+        console.log("    ID: " + gamepads[i].id);
+        console.log("    Axes: " + gamepads[i].axes);
+        console.log("    Buttons: " + gamepads[i].buttons);  
+        */
+      }
+    }
+  }, 100)
+} else {
+  clearGamepads()
+}

@@ -10,10 +10,16 @@ class Entity {
   screenWrap = false
   speed = 60.
 
+  collides = true // collision detection
+  response = true // collision response
+
+  ttl = 1e9
+  time = 0.
+  alive = true
 
   alpha = 1. // draw alpha
   order = 1. // draw order, lower first
-  color = '#aaa' // draw fill style/color
+  color = '#fff' // draw fill style/color
   scale = [1., 1.] // draw scale
 
   constructor(params) {
@@ -46,11 +52,17 @@ class Entity {
     rect(cx, cy, xs, ys, this.color, this.alpha)
   }
 
-  update(dt) {
-
-  }
+  update(dt) {}
+  onCollide(other) {}
+  onBounce() {}
+  onKill() {}
 
   _update(dt) {
+    this.time += dt
+    if (this.time > this.ttl) {
+      this.alive = false
+      this.onKill()
+    }
     this.position[0] += this.velocity[0] * dt
     this.position[1] += this.velocity[1] * dt
     for (let c = 0; c < 2; c++) {
@@ -58,9 +70,11 @@ class Entity {
       if (this.screenBounce) {
         if (this.position[c] - this.extend[c] < 0 && this.velocity[c] < 0) {
           this.velocity[c] *= -1
+          this.onBounce()
         }
         if (this.position[c] + this.extend[c] > bound && this.velocity[c] > 0) {
           this.velocity[c] *= -1
+          this.onBounce()
         }
       }
       if (this.screenBound) {
@@ -79,27 +93,41 @@ class Entity {
   dispose() {
 
   }
+
+  _min = [0., 0.]
+  _max = [0., 0.]
 }
 
 window.Entity = Entity
 
 window.updateAllEntities = (dt) => {
+  E = E.filter(e => e.alive)
   E.forEach(e => {
-    let hw = e.w / 2
-    let hh = e.h / 2
-    e._minx = e.x - hw
-    e._maxx = e.x + hw
-    e._miny = e.y - hh
-    e._maxy = e.y + hh
+    e._min[0] = e.position[0] - e.extend[0]
+    e._max[0] = e.position[0] + e.extend[0]
+    e._min[1] = e.position[1] - e.extend[1]
+    e._max[1] = e.position[1] + e.extend[1]
   })
-  E.sort((a, b) => a._minx - b._minx)
+  E.sort((a, b) => a._min[0] - b._min[0])
   E.forEach(e => {
     e._update(dt)
     e.update(dt)
   })
+  let ec = E.length
+  for (let i = 0; i < ec - 1; i++) {
+    let a = E[i];
+    for (let j = i + 1; j < ec; j++) {
+      let b = E[j];
+      if (a.collides && b.collides && a.position[0] < b._max[0] && a._max[0] > b.position[0] && a.position[1] < b._max[1] && a._max[1] > b.position[1]) {
+        a.onCollide(b)
+        b.onCollide(a)
+      }
+    }
+  }
 }
 
 window.drawAllEntities = () => {
+  _dE = _dE.filter(e => e.alive)
   _dE.sort((a, b) => a.order - b.order)
   _dE.forEach(e => {
     e.draw()
