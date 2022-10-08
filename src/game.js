@@ -38,9 +38,12 @@ class Sprite extends Entity {
 }
 
 class Actor extends Sprite {
-  hp = 5
+  actor = true
+  hp = 1
   protectedTime = -1
   protection = 1.
+  hitBy = false
+  dead = false
 
   update(dt) {
     this.protectedTime -= dt
@@ -54,17 +57,20 @@ class Actor extends Sprite {
     }
   }
 
-  hit(dmg) {
+  hit(dmg, other=false) {
     if (this.protectedTime < 0) {
       this.hp -= dmg
       this.tint = 1.0
       this.color = '#fac'
+      this.hitBy = other
     }
-    if (this.hp < 1) {
+    if (this.hp < 1e-3) {
+      this.actor = false
       this.ttl = this.time + 0.2
       this.vx = 0
       this.vy = 0
-    } else {
+      this.dead = true
+    } else if (this.protectedTime < 0) {
       this.protectedTime = this.protection
     }
   }
@@ -73,7 +79,7 @@ class Actor extends Sprite {
 class Player extends Actor {
   hp = 5
   protectedTime = -1
-  protection = 3.
+  protection = 2.
   type = "player"
   minFrame = 0
   maxFrame = 3
@@ -81,6 +87,7 @@ class Player extends Actor {
   screenBound = true
   order = 1000
   extend = [16, 16]
+  score = 0
 
   update(dt) {
     super.update(dt)
@@ -96,7 +103,17 @@ class Player extends Actor {
 
   onCollide(b) {
     if (b.type == "baddie") {
-      this.hit(1)
+      this.hit(1, b)
+    }
+  }
+
+  hit(dmg, other=false) {
+    if (this.protectedTime < 0) {
+      _shakea = 20
+    }
+    super.hit(dmg, other)
+    if (this.dead) {
+      startLevel()
     }
   }
 }
@@ -113,32 +130,38 @@ class Baddie extends Actor {
   order = 500
 }
 
-const BUSPEED = 300
+const BUSPEED = 600
 class Bullet extends Entity {
   type = "bullet"
-  ttl = 5
+  ttl = 1
   scale = [0.25, 0.25]
   color1 = '#FFF'
   color2 = '#66F'
+  screenBounce = true
 
   draw() {
     let cx = this.x + _shake[0]
     let cy = this.y + _shake[1]
-    let dx = this.vx * 0.03
-    let dy = this.vy * 0.03
+    let dx = this.vx * 0.02
+    let dy = this.vy * 0.02
     //rect(cx - this.extend[0], cy - this.extend[1], this.w, this.h, '#0a0', 0.5)
     line(cx - dx * 1.5, cy - dy * 1.5, cx + dx, cy + dy, this.color2, 6, 0.8)
     line(cx - dx , cy - dy, cx + dx, cy + dy, this.color1, 3, 1)
   }
 
   onCollide(b) {
-    if (b.type == "player") { return }
-    b.hit(1)
+    if (b.type != "baddie") { return }
+    b.hit(1, this)
+    if (b.dead) {
+      player.score++
+    }
+    this.ttl = 0
   }
 }
 
 
 function startLevel() {
+  _shakea = 0
   clearStage()
   window.player = new Player({
     x: 25,
@@ -150,6 +173,7 @@ function startLevel() {
       velocity: [rnd(-BSPEED * 1.5, -BSPEED), rnd() > 0.5 ? rnd(BSPEED, BSPEED * 1.5) : rnd(-BSPEED * 1.5, BSPEED)]
     })
   }
+  startTime = time
 }
 
 startLevel()
@@ -182,7 +206,7 @@ window.drawForeground = () => {
   rect(pointerX, pointerY - cs * 2, 1, cs, '#0F0')
   rect(pointerX, pointerY + cs, 1, cs, '#0F0')
   */
-  drawText("font", "0123", width - 128 + _shake[0], 8 + _shake[1])
+  drawText("font", ''+player.score, width - 128 + _shake[0], 8 + _shake[1])
 }
 
 window.update = (dt) => {
@@ -198,6 +222,18 @@ window.update = (dt) => {
   let x2 = x1 + cos(rayAlpha) * rayLen
   let y2 = y1 + sin(rayAlpha) * rayLen
 
+  E.forEach(e => {
+    if (e.actor) {
+      let rayd = pDistance(e.position[0], e.position[1], x1, y1, x2, y2)
+      if (rayd < 16) {
+        if (e.type == "player") {
+          e.hit(1)
+        } else {
+          e.hit(0.334)
+        }
+      }
+    }
+  })
 }
 
 window.onkey = (kc) => {

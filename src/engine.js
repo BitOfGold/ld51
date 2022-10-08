@@ -29,7 +29,7 @@ function _loop() {
   let t = performance.now() / 1000.0
   let dt = t - time
   if (dt < 0.1) {
-      _shakea *= 0.8
+      _shakea *= 0.95
       if (_shakea < 2) { _shakea = 0.}
       _shake[0] = rnd(-1, 1) * _shakea
       _shake[1] = rnd(-1, 1) * _shakea

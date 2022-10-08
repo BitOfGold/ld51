@@ -136,4 +136,5 @@ window.drawAllEntities = () => {
 
 window.clearStage = () => {
   E = []
+  _dE = []
 }
